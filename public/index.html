@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tiktok Downloader</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            font-family: 'Poppins', sans-serif;
+            background-image: url('https://files.catbox.moe/ble3jh.jpg');
+            background-size: cover;
+            background-position: center;
+        }
+        .container {
+            background-color: rgba(255, 255, 255, 0.3); /* Transparansi 90% */
+            backdrop-filter: blur(10px);
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
+            width: 320px; /* Ukuran yang konsisten */
+            text-align: center;
+            position: relative;
+        }
+        h2 {
+            margin-bottom: 20px;
+            font-size: 24px;
+            color: #333;
+        }
+        input[type="text"] {
+            width: 93%;
+            padding: 12px;
+            margin-bottom: 20px;
+            border: none;
+            border-radius: 8px;
+            background-color: rgba(255, 255, 255, 0.3); /* Transparansi 90% */
+            backdrop-filter: blur(10px);
+            font-style: italic;
+            font-size: 16px;
+            outline: none;
+        }
+        input[type="text"]:focus {
+            background-color: rgba(255, 255, 255, 0.3); /* Transparansi 90% */
+            backdrop-filter: blur(10px);
+        }
+        .download-btn {
+            margin-top: 10px;
+            padding: 10px;
+            background-color: #28a745;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            width: 100%;
+            font-size: 16px;
+            position: relative; /* Agar loading bar posisinya relatif */
+        }
+        .loading-bar {
+            position: absolute;
+            bottom: -7px;
+            left: 0;
+            width: 0%;
+            height: 5px;
+            background-color: #28a745;
+            transition: width 0.3s ease;
+        }
+        .popup {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0);
+            background-color: rgba(255, 255, 255, 0.4); /* Transparansi 90% */
+            backdrop-filter: blur(10px);
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
+            width: 320px;
+            z-index: 1000;
+            animation: bounceIn 0.5s forwards;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+        .popup.open {
+            display: block;
+        }
+        .popup.close {
+            animation: bounceOut 0.5s forwards;
+        }
+        .popup img {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            margin: 0 auto 10px auto;
+            display: block;
+        }
+        .popup video {
+            width: 100%;
+            height: auto;
+            border-radius: 10px;
+            margin-bottom: 10px;
+        }
+        .popup .info {
+            margin-top: 10px;
+            text-align: center;
+        }
+        .popup .info div {
+            margin-bottom: 10px;
+        }
+        .popup .info i {
+            margin-right: 5px;
+        }
+        .popup .close-btn {
+            margin-top: 10px;
+            padding: 10px;
+            background-color: rgba(255, 255, 255, 0.3); /* Transparansi 90% */
+            backdrop-filter: blur(10px);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+        @keyframes bounceIn {
+            0% {
+                transform: translate(-50%, -50%) scale(0);
+            }
+            60% {
+                transform: translate(-50%, -50%) scale(1.1);
+            }
+            100% {
+                transform: translate(-50%, -50%) scale(1);
+            }
+        }
+        @keyframes bounceOut {
+            0% {
+                transform: translate(-50%, -50%) scale(1);
+            }
+            60% {
+                transform: translate(-50%, -50%) scale(1.1);
+            }
+            100% {
+                transform: translate(-50%, -50%) scale(0);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Tiktok Downloader</h2>
+        <form id="urlForm">
+            <input type="text" id="urlInput" placeholder="Paste URL Here" required>
+            <button type="submit" class="download-btn">
+                <i class="fas fa-download"></i> Download
+                <div class="loading-bar" id="loadingBar"></div>
+            </button>
+        </form>
+    </div>
+
+    <div class="popup" id="mediaPopup">
+        <img id="creatorAvatar" alt="Avatar">
+        <video id="videoPreview" controls autoplay muted loop></video>
+        <div id="creatorName"></div>
+        <div class="info">
+            <div><i class="fas fa-tag"></i> <span id="videoTitle"></span></div>
+            <div><i class="fas fa-comments"></i> <span id="videoComments"></span></div>
+            <div><i class="fas fa-share"></i> <span id="videoShares"></span></div>
+            <div><i class="fas fa-eye"></i> <span id="videoViews"></span></div>
+            <div><i class="fas fa-play"></i> <span id="videoPlays"></span></div>
+            <div><i class="fas fa-clock"></i> <span id="videoDuration"></span></div>
+        </div>
+        <button class="close-btn" id="closePopup">Close</button>
+    </div>
+
+    <script>
+        document.getElementById('urlForm').addEventListener('submit', async function(event) {
+            event.preventDefault();
+            const urlInput = document.getElementById('urlInput').value.trim();
+            const loadingBar = document.getElementById('loadingBar');
+            const mediaPopup = document.getElementById('mediaPopup');
+
+            if (urlInput === '') return;
+
+            loadingBar.style.width = '30%';
+
+            try {
+                const response = await fetch('/api/download', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ url: urlInput })
+                });
+
+                const data = await response.json();
+                if (data.status) {
+                    loadingBar.style.width = '100%';
+
+                    document.getElementById('creatorAvatar').src = data.data.author.avatar;
+                    document.getElementById('creatorName').textContent = data.data.author.nickname;
+                    document.getElementById('videoTitle').textContent = data.data.title;
+                    document.getElementById('videoComments').textContent = data.data.comment;
+                    document.getElementById('videoShares').textContent = data.data.share;
+                    document.getElementById('videoViews').textContent = data.data.view;
+                    document.getElementById('videoPlays').textContent = data.data.play;
+                    document.getElementById('videoDuration').textContent = data.data.duration + 's';
+                    document.getElementById('videoPreview').src = data.data.video_url;
+
+                    mediaPopup.classList.add('open');
+                }
+            } catch (error) {
+                console.error('Download failed', error);
+            } finally {
+                loadingBar.style.width = '0%';
+            }
+        });
+
+        document.getElementById('closePopup').addEventListener('click', function() {
+            const mediaPopup = document.getElementById('mediaPopup');
+            mediaPopup.classList.remove('open');
+            mediaPopup.classList.add('close');
+
+            setTimeout(() => {
+                mediaPopup.classList.remove('close');
+            }, 500);
+        });
+    </script>
+</body>
+</html>
