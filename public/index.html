@@ -220,12 +220,15 @@
 
         document.getElementById('closePopup').addEventListener('click', function() {
             const mediaPopup = document.getElementById('mediaPopup');
+            const videoPreview = document.getElementById('videoPreview');
+
             mediaPopup.classList.remove('open');
             mediaPopup.classList.add('close');
+            videoPreview.pause(); // Video akan pause ketika pop-up ditutup
 
             setTimeout(() => {
                 mediaPopup.classList.remove('close');
-            }, 500);
+            }, 100); // Sama dengan durasi animasi bounceOut
         });
     </script>
 </body>
