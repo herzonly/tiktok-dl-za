@@ -15,7 +15,7 @@ document.addEventListener('DOMContentLoaded', () => {
             showLoadingBar();
 
             try {
-                const response = await fetch('/download', {
+                const response = await fetch('/api/download', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
