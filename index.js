@@ -7,7 +7,7 @@ const port = 3000;
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
 
-app.get('/api/download/tiktok', async (req, res) => {
+app.get('/download/', async (req, res) => {
   const { url } = req.query;
 
   if (!url) {
