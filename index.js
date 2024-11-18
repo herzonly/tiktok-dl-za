@@ -5,9 +5,8 @@ const app = express();
 const port = 3000;
 
 app.use(express.json());
-app.use(express.static(path.join(__dirname, 'public')));
 
-app.get('/download/', async (req, res) => {
+app.get('/download', async (req, res) => {
   const { url } = req.query;
 
   if (!url) {
@@ -49,6 +48,8 @@ app.get('/download/', async (req, res) => {
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
+
+app.use(express.static(path.join(__dirname, 'public'))); // Pindahkan ke sini
 
 app.listen(port, () => {
   console.log(`Server berjalan di http://localhost:${port}`);
