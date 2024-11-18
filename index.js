@@ -4,15 +4,11 @@ const path = require('path');
 const app = express();
 const port = 3000;
 
-// Middleware untuk parsing JSON
 app.use(express.json());
-
-// Melayani file statis (HTML, CSS, JS)
 app.use(express.static(path.join(__dirname, 'public')));
 
-// API endpoint untuk mendapatkan video TikTok
-app.post('/download', async (req, res) => {
-  const { url } = req.body;
+app.get('/api/download/tiktok', async (req, res) => {
+  const { url } = req.query;
 
   if (!url) {
     return res.status(400).json({ error: 'URL tidak diberikan' });
@@ -23,6 +19,8 @@ app.post('/download', async (req, res) => {
 
     if (data.status) {
       return res.json({
+        creator: "herza",
+        msg: "success",
         status: true,
         data: {
           author: data.data.author,
@@ -37,20 +35,20 @@ app.post('/download', async (req, res) => {
         }
       });
     } else {
-      return res.status(400).json({ status: false, error: 'Gagal mendapatkan data TikTok' });
+      return res.status(400).json({
+        status: false,
+        error: 'Gagal mendapatkan data TikTok',
+        msg: "error mas"
+      });
     }
   } catch (error) {
-    console.error(error);
     res.status(500).json({ error: 'Terjadi kesalahan pada server' });
   }
 });
 
-
-
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
-
 
 app.listen(port, () => {
   console.log(`Server berjalan di http://localhost:${port}`);

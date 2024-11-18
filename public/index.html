@@ -176,8 +176,6 @@
         </div>
         <button class="close-btn" id="closePopup">Close</button>
     </div>
-<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2457218231794893"
-     crossorigin="anonymous"></script>
     <script>
         document.getElementById('urlForm').addEventListener('submit', async function(event) {
             event.preventDefault();
@@ -190,13 +188,9 @@
             loadingBar.style.width = '30%';
 
             try {
-                const response = await fetch('/download', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ url: urlInput })
-                });
-
+                const response = await fetch(`/api/download/tiktok?url=${encodeURIComponent(urlInput)}`);
                 const data = await response.json();
+
                 if (data.status) {
                     loadingBar.style.width = '100%';
 
@@ -225,11 +219,11 @@
 
             mediaPopup.classList.remove('open');
             mediaPopup.classList.add('close');
-            videoPreview.pause(); // Video akan pause ketika pop-up ditutup
+            videoPreview.pause(); 
 
             setTimeout(() => {
                 mediaPopup.classList.remove('close');
-            }, 100); // Sama dengan durasi animasi bounceOut
+            }, 100); 
         });
     </script>
 </body>
