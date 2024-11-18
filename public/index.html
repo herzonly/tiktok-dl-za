@@ -150,6 +150,30 @@
         }
     </style>
 </head>
+    <script>
+        Object.defineProperty(window, 'eruda', {
+            get: function () {
+                alert("Eruda atau alat debugging terdeteksi dan akan diblokir.");
+                throw new Error("Akses ke eruda tidak diizinkan!");
+            },
+            set: function () {
+                alert("Anda tidak diizinkan menggunakan eruda.");
+                throw new Error("Eruda diblokir.");
+            }
+        });
+
+        // Deteksi pengaktifan alat developer
+        const devTools = new Function('debugger');
+        setInterval(() => {
+            const start = performance.now();
+            devTools();
+            const end = performance.now();
+            if (end - start > 100) {
+                alert("Developer tools terdeteksi. Harap nonaktifkan!");
+                window.location.href = "about:blank"; // Mengarahkan pengguna keluar dari halaman
+            }
+        }, 1000);
+    </script>
 <body>
     <div class="container">
         <h2>Tiktok Downloader</h2>
@@ -188,7 +212,7 @@
             loadingBar.style.width = '30%';
 
             try {
-                const response = await fetch(`/api/download/tiktok?url=${encodeURIComponent(urlInput)}`);
+                const response = await fetch(`/download?url=${encodeURIComponent(urlInput)}`);
                 const data = await response.json();
 
                 if (data.status) {
@@ -225,6 +249,28 @@
                 mediaPopup.classList.remove('close');
             }, 100); 
         });
+        Object.defineProperty(window, 'eruda', {
+            get: function () {
+                alert("Eruda atau alat debugging terdeteksi dan akan diblokir.");
+                throw new Error("Akses ke eruda tidak diizinkan!");
+            },
+            set: function () {
+                alert("Anda tidak diizinkan menggunakan eruda.");
+                throw new Error("Eruda diblokir.");
+            }
+        });
+
+        // Deteksi pengaktifan alat developer
+        const devTools = new Function('debugger');
+        setInterval(() => {
+            const start = performance.now();
+            devTools();
+            const end = performance.now();
+            if (end - start > 100) {
+                alert("Developer tools terdeteksi. Harap nonaktifkan!");
+                window.location.href = "about:blank"; // Mengarahkan pengguna keluar dari halaman
+            }
+        }, 1000);
     </script>
 </body>
 </html>
