@@ -11,7 +11,7 @@ app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
 
 // API endpoint untuk mendapatkan video TikTok
-app.post('/api/download', async (req, res) => {
+app.post('/download', async (req, res) => {
   const { url } = req.body;
 
   if (!url) {
