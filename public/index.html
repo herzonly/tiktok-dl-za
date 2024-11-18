@@ -19,14 +19,13 @@
             background-position: center;
         }
         .container {
-            background-color: rgba(255, 255, 255, 0.3); /* Transparansi 90% */
+            background-color: rgba(255, 255, 255, 0.3);
             backdrop-filter: blur(10px);
             padding: 30px;
             border-radius: 15px;
             box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
-            width: 320px; /* Ukuran yang konsisten */
+            width: 320px;
             text-align: center;
-            position: relative;
         }
         h2 {
             margin-bottom: 20px;
@@ -39,15 +38,11 @@
             margin-bottom: 20px;
             border: none;
             border-radius: 8px;
-            background-color: rgba(255, 255, 255, 0.3); /* Transparansi 90% */
+            background-color: rgba(255, 255, 255, 0.3);
             backdrop-filter: blur(10px);
             font-style: italic;
             font-size: 16px;
             outline: none;
-        }
-        input[type="text"]:focus {
-            background-color: rgba(255, 255, 255, 0.3); /* Transparansi 90% */
-            backdrop-filter: blur(10px);
         }
         .download-btn {
             margin-top: 10px;
@@ -59,7 +54,7 @@
             cursor: pointer;
             width: 100%;
             font-size: 16px;
-            position: relative; /* Agar loading bar posisinya relatif */
+            position: relative;
         }
         .loading-bar {
             position: absolute;
@@ -76,7 +71,7 @@
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%) scale(0);
-            background-color: rgba(255, 255, 255, 0.4); /* Transparansi 90% */
+            background-color: rgba(255, 255, 255, 0.4);
             backdrop-filter: blur(10px);
             padding: 20px;
             border-radius: 15px;
@@ -89,9 +84,6 @@
         }
         .popup.open {
             display: block;
-        }
-        .popup.close {
-            animation: bounceOut 0.5s forwards;
         }
         .popup img {
             width: 80px;
@@ -106,20 +98,13 @@
             border-radius: 10px;
             margin-bottom: 10px;
         }
-        .popup .info {
-            margin-top: 10px;
-            text-align: center;
-        }
         .popup .info div {
             margin-bottom: 10px;
-        }
-        .popup .info i {
-            margin-right: 5px;
         }
         .popup .close-btn {
             margin-top: 10px;
             padding: 10px;
-            background-color: rgba(255, 255, 255, 0.3); /* Transparansi 90% */
+            background-color: rgba(255, 255, 255, 0.3);
             backdrop-filter: blur(10px);
             color: white;
             border: none;
@@ -137,53 +122,16 @@
                 transform: translate(-50%, -50%) scale(1);
             }
         }
-        @keyframes bounceOut {
-            0% {
-                transform: translate(-50%, -50%) scale(1);
-            }
-            60% {
-                transform: translate(-50%, -50%) scale(1.1);
-            }
-            100% {
-                transform: translate(-50%, -50%) scale(0);
-            }
-        }
     </style>
 </head>
-    <script>
-        Object.defineProperty(window, 'eruda', {
-            get: function () {
-                alert("Eruda atau alat debugging terdeteksi dan akan diblokir.");
-                throw new Error("Akses ke eruda tidak diizinkan!");
-            },
-            set: function () {
-                alert("Anda tidak diizinkan menggunakan eruda.");
-                throw new Error("Eruda diblokir.");
-            }
-        });
-
-        // Deteksi pengaktifan alat developer
-        const devTools = new Function('debugger');
-        setInterval(() => {
-            const start = performance.now();
-            devTools();
-            const end = performance.now();
-            if (end - start > 100) {
-                alert("Developer tools terdeteksi. Harap nonaktifkan!");
-                window.location.href = "about:blank"; // Mengarahkan pengguna keluar dari halaman
-            }
-        }, 1000);
-    </script>
 <body>
     <div class="container">
         <h2>Tiktok Downloader</h2>
-        <form id="urlForm">
-            <input type="text" id="urlInput" placeholder="Paste URL Here" required>
-            <button type="submit" class="download-btn">
-                <i class="fas fa-download"></i> Download
-                <div class="loading-bar" id="loadingBar"></div>
-            </button>
-        </form>
+        <input type="text" id="urlInput" placeholder="Paste URL Here">
+        <button type="button" class="download-btn" id="downloadButton">
+            <i class="fas fa-download"></i> Download
+            <div class="loading-bar" id="loadingBar"></div>
+        </button>
     </div>
 
     <div class="popup" id="mediaPopup">
@@ -193,84 +141,48 @@
         <div class="info">
             <div><i class="fas fa-tag"></i> <span id="videoTitle"></span></div>
             <div><i class="fas fa-comments"></i> <span id="videoComments"></span></div>
-            <div><i class="fas fa-share"></i> <span id="videoShares"></span></div>
             <div><i class="fas fa-eye"></i> <span id="videoViews"></span></div>
-            <div><i class="fas fa-play"></i> <span id="videoPlays"></span></div>
-            <div><i class="fas fa-clock"></i> <span id="videoDuration"></span></div>
         </div>
         <button class="close-btn" id="closePopup">Close</button>
     </div>
-    <script>
-        document.getElementById('urlForm').addEventListener('submit', async function(event) {
-            event.preventDefault();
-            const urlInput = document.getElementById('urlInput').value.trim();
-            const loadingBar = document.getElementById('loadingBar');
-            const mediaPopup = document.getElementById('mediaPopup');
 
-            if (urlInput === '') return;
+    <script>
+        const downloadButton = document.getElementById('downloadButton');
+        const urlInput = document.getElementById('urlInput');
+        const loadingBar = document.getElementById('loadingBar');
+        const mediaPopup = document.getElementById('mediaPopup');
+
+        downloadButton.addEventListener('click', async () => {
+            const url = urlInput.value.trim();
+            if (!url) return alert('Masukkan URL!');
 
             loadingBar.style.width = '30%';
-
             try {
-                const response = await fetch(`/download?url=${encodeURIComponent(urlInput)}`);
+                const response = await fetch(`/download?url=${encodeURIComponent(url)}`);
                 const data = await response.json();
 
                 if (data.status) {
                     loadingBar.style.width = '100%';
-
                     document.getElementById('creatorAvatar').src = data.data.author.avatar;
                     document.getElementById('creatorName').textContent = data.data.author.nickname;
                     document.getElementById('videoTitle').textContent = data.data.title;
-                    document.getElementById('videoComments').textContent = data.data.comment;
-                    document.getElementById('videoShares').textContent = data.data.share;
-                    document.getElementById('videoViews').textContent = data.data.view;
-                    document.getElementById('videoPlays').textContent = data.data.play;
-                    document.getElementById('videoDuration').textContent = data.data.duration + 's';
-                    document.getElementById('videoPreview').src = data.data.video_url;
-
+                    document.getElementById('videoComments').textContent = data.data.commentCount;
+                    document.getElementById('videoViews').textContent = data.data.viewCount;
+                    document.getElementById('videoPreview').src = data.data.videoUrl;
                     mediaPopup.classList.add('open');
+                } else {
+                    alert('Gagal mendapatkan video.');
                 }
-            } catch (error) {
-                console.error('Download failed', error);
+            } catch (err) {
+                console.error('Error:', err);
             } finally {
                 loadingBar.style.width = '0%';
             }
         });
 
-        document.getElementById('closePopup').addEventListener('click', function() {
-            const mediaPopup = document.getElementById('mediaPopup');
-            const videoPreview = document.getElementById('videoPreview');
-
+        document.getElementById('closePopup').addEventListener('click', () => {
             mediaPopup.classList.remove('open');
-            mediaPopup.classList.add('close');
-            videoPreview.pause(); 
-
-            setTimeout(() => {
-                mediaPopup.classList.remove('close');
-            }, 100); 
         });
-        Object.defineProperty(window, 'eruda', {
-            get: function () {
-                alert("🤬🤬🤬Eruda atau alat debugging terdeteksi dan akan diblokir.");
-                throw new Error("Akses ke eruda tidak diizinkan!");
-            },
-            set: function () {
-                alert("🤬🤬🤬Anda tidak diizinkan menggunakan eruda.");
-                throw new Error("Eruda diblokir.");
-            }
-        });
-
-        // Deteksi pengaktifan alat developer
-        const devTools = new Function('debugger');
-        setInterval(() => {
-            const start = performance.now();
-            devTools();
-            const end = performance.now();
-            if (end - start > 100) {
-                alert("Developer tools terdeteksi. Harap nonaktifkan!");
-                window.location.href = "about:blank"; // Mengarahkan pengguna keluar dari halaman
-            }
-        }, 1000);
     </script>
 </body>
 </html>
