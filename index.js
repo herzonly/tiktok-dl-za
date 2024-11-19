@@ -6,7 +6,7 @@ const port = 3000;
 
 app.use(express.json());
 
-app.get('/download', async (req, res) => {
+app.use('/download', async (req, res) => {
   const { url } = req.query;
 
   if (!url) {
