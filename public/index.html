@@ -184,6 +184,11 @@
                     videoPreview.load();
 
                     mediaPopup.classList.add('open');
+                    const downloadLink = document.createElement('a');
+            downloadLink.href = `/download?url=${encodeURIComponent(url)}`;
+            downloadLink.download = `${data.data.title}.mp4`; // Nama file yang diunduh
+            downloadLink.click(); // Simulasikan klik untuk mengunduh
+        
                 } else {
                     alert('Gagal mendapatkan video.');
                 }
