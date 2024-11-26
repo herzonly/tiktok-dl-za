@@ -18,21 +18,28 @@ app.use('/download', async (req, res) => {
     const data = await tikdown(url);
 
     if (data.status) {
-      return res.json({
-        creator: "herza",
-        msg: "success",
-        status: true,
-        data: {
-          author: data.data.author,
-          title: data.data.title,
-          video_url: data.data.video,
-          audio_url: data.data.audio,
-          view: data.data.view,
-          comment: data.data.comment,
-          share: data.data.share,
-          play: data.data.play,
-          duration: data.data.duration,
-        }
+      // Simpan file video ke server
+      const videoUrl = data.data.video; // URL video
+      const filePath = path.join(__dirname, 'downloads', `${data.data.title}.mp4`);
+
+      // Download file video dari URL dan simpan ke server
+      const videoResponse = await fetch(videoUrl);
+      const dest = fs.createWriteStream(filePath);
+      videoResponse.body.pipe(dest);
+
+      dest.on('finish', () => {
+        res.download(filePath, (err) => {
+          if (err) {
+            console.error('Error downloading file:', err);
+          }
+          // Hapus file setelah diunduh (opsional)
+          fs.unlinkSync(filePath);
+        });
+      });
+
+      dest.on('error', (err) => {
+        console.error('Error saving file:', err);
+        res.status(500).json({ error: 'Terjadi kesalahan saat menyimpan video.' });
       });
     } else {
       return res.status(400).json({
