@@ -2,7 +2,7 @@ const express = require('express');
 const { tikdown } = require('nayan-media-downloader');
 const path = require('path');
 const fs = require('fs');
-const fetch = require('node-fetch');
+const https = require('https'); // Menggunakan modul bawaan untuk unduhan
 const app = express();
 const port = 3000;
 
@@ -23,49 +23,60 @@ app.use('/download', async (req, res) => {
       const videoUrl = data.data.video;
       const filePath = path.join(__dirname, 'downloads', `${data.data.title}.mp4`);
 
-      const videoResponse = await fetch(videoUrl);
-      const dest = fs.createWriteStream(filePath);
+      // Membuat direktori "downloads" jika belum ada
+      if (!fs.existsSync(path.join(__dirname, 'downloads'))) {
+        fs.mkdirSync(path.join(__dirname, 'downloads'));
+      }
 
-      videoResponse.body.pipe(dest);
+      const file = fs.createWriteStream(filePath);
+      https.get(videoUrl, (response) => {
+        response.pipe(file);
 
-      dest.on('finish', () => {
-        res.json({
-          creator: "herza",
-          msg: "success",
-          status: true,
-          data: {
-            author: data.data.author,
-            title: data.data.title,
-            video_url: data.data.video,
-            audio_url: data.data.audio,
-            view: data.data.view,
-            comment: data.data.comment,
-            share: data.data.share,
-            play: data.data.play,
-            duration: data.data.duration,
-          }
+        file.on('finish', () => {
+          file.close(() => {
+            res.json({
+              creator: "herza",
+              msg: "success",
+              status: true,
+              data: {
+                author: data.data.author,
+                title: data.data.title,
+                video_url: data.data.video,
+                audio_url: data.data.audio,
+                view: data.data.view,
+                comment: data.data.comment,
+                share: data.data.share,
+                play: data.data.play,
+                duration: data.data.duration,
+              },
+            });
+
+            res.download(filePath, (err) => {
+              if (err) {
+                console.error('Error saat mengunduh file:', err);
+              }
+              fs.unlinkSync(filePath); // Menghapus file setelah diunduh
+            });
+          });
         });
 
-        res.download(filePath, (err) => {
-          if (err) {
-            console.error('Error downloading file:', err);
-          }
-          fs.unlinkSync(filePath);
+        file.on('error', (err) => {
+          console.error('Error saat menyimpan file:', err);
+          res.status(500).json({ error: 'Terjadi kesalahan saat menyimpan video.' });
         });
-      });
-
-      dest.on('error', (err) => {
-        console.error('Error saving file:', err);
-        res.status(500).json({ error: 'Terjadi kesalahan saat menyimpan video.' });
+      }).on('error', (err) => {
+        console.error('Error saat mengunduh file:', err);
+        res.status(500).json({ error: 'Terjadi kesalahan saat mengunduh video.' });
       });
     } else {
       return res.status(400).json({
         status: false,
         error: 'Gagal mendapatkan data TikTok',
-        msg: "error mas"
+        msg: "error mas",
       });
     }
   } catch (error) {
+    console.error('Error:', error);
     res.status(500).json({ error: 'Terjadi kesalahan pada server' });
   }
 });
