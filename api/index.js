@@ -1,11 +1,13 @@
 const express = require('express');
 const { tikdown } = require('nayan-media-downloader');
 const path = require('path');
+const fs = require('fs');
+const fetch = require('node-fetch');
 const app = express();
 const port = 3000;
 
 app.use(express.json());
-app.use(express.static(path.join(__dirname, '..', 'public'))); // Pindahkan ke sini
+app.use(express.static(path.join(__dirname, '..', 'public')));
 
 app.use('/download', async (req, res) => {
   const { url } = req.query;
@@ -18,37 +20,36 @@ app.use('/download', async (req, res) => {
     const data = await tikdown(url);
 
     if (data.status) {
-      res.json({
-        creator: "herza",
-        msg: "success",
-        status: true,
-        data: {
-          author: data.data.author,
-          title: data.data.title,
-          video_url: data.data.video,
-          audio_url: data.data.audio,
-          view: data.data.view,
-          comment: data.data.comment,
-          share: data.data.share,
-          play: data.data.play,
-          duration: data.data.duration,
-        }
-      });
-      // Simpan file video ke server
-      const videoUrl = data.data.video; // URL video
-      const filePath = path.join(__dirname, 'downloads', `${data.data.title}.mp4`);
+      const videoUrl = data.data.video;
+      const filePath = path.join(__dirname, '..', 'downloads', `${data.data.title}.mp4`);
 
-      // Download file video dari URL dan simpan ke server
       const videoResponse = await fetch(videoUrl);
       const dest = fs.createWriteStream(filePath);
+
       videoResponse.body.pipe(dest);
 
       dest.on('finish', () => {
+        res.json({
+          creator: "herza",
+          msg: "success",
+          status: true,
+          data: {
+            author: data.data.author,
+            title: data.data.title,
+            video_url: data.data.video,
+            audio_url: data.data.audio,
+            view: data.data.view,
+            comment: data.data.comment,
+            share: data.data.share,
+            play: data.data.play,
+            duration: data.data.duration,
+          }
+        });
+
         res.download(filePath, (err) => {
           if (err) {
             console.error('Error downloading file:', err);
           }
-          // Hapus file setelah diunduh (opsional)
           fs.unlinkSync(filePath);
         });
       });
