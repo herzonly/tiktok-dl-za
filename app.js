@@ -7,7 +7,7 @@ const app = express();
 const port = 3000;
 
 app.use(express.json());
-app.use(express.static(path.join(__dirname, '..', 'public')));
+app.use(express.static(path.join(__dirname, 'public')));
 
 app.use('/download', async (req, res) => {
   const { url } = req.query;
@@ -21,7 +21,7 @@ app.use('/download', async (req, res) => {
 
     if (data.status) {
       const videoUrl = data.data.video;
-      const filePath = path.join(__dirname, '..', 'downloads', `${data.data.title}.mp4`);
+      const filePath = path.join(__dirname, 'downloads', `${data.data.title}.mp4`);
 
       const videoResponse = await fetch(videoUrl);
       const dest = fs.createWriteStream(filePath);
@@ -71,7 +71,7 @@ app.use('/download', async (req, res) => {
 });
 
 app.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, '..', 'public', 'index.html'));
+  res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
 app.listen(port, () => {
