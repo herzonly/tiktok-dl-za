@@ -18,6 +18,22 @@ app.use('/download', async (req, res) => {
     const data = await tikdown(url);
 
     if (data.status) {
+      res.json({
+        creator: "herza",
+        msg: "success",
+        status: true,
+        data: {
+          author: data.data.author,
+          title: data.data.title,
+          video_url: data.data.video,
+          audio_url: data.data.audio,
+          view: data.data.view,
+          comment: data.data.comment,
+          share: data.data.share,
+          play: data.data.play,
+          duration: data.data.duration,
+        }
+      });
       // Simpan file video ke server
       const videoUrl = data.data.video; // URL video
       const filePath = path.join(__dirname, 'downloads', `${data.data.title}.mp4`);
