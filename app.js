@@ -23,7 +23,7 @@ app.use('/download', async (req, res) => {
   try {
     // Fetch TikTok video data
     const data = await tikdown(url);
-    const videoUrl = data.data.video;
+    const videoUrl = data.data.video_url;
     if (!data.status) {
       return res.status(400).json({
         status: false,
