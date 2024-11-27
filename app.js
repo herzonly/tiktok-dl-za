@@ -23,7 +23,7 @@ app.use('/download', async (req, res) => {
   try {
     // Fetch TikTok video data
     const data = await tikdown(url);
-    
+    const videoUrl = data.data.video;
     if (!data.status) {
       return res.status(400).json({
         status: false,
@@ -31,8 +31,6 @@ app.use('/download', async (req, res) => {
         msg: "error mas",
       });
     }
-
-    const videoUrl = data.data.video;
     const downloadDir = path.join(__dirname, 'downloads');
     const filePath = path.join(downloadDir, `${data.data.title}.mp4`);
 
@@ -47,6 +45,24 @@ app.use('/download', async (req, res) => {
       
       file.on('finish', () => {
         file.close(() => {
+          res.download(filePath, (err) => {
+            if (err) {
+              console.error('Error saat mengunduh file:', err);
+            }
+            fs.unlinkSync(filePath);
+          });
+        });
+      });
+
+      file.on('error', (err) => {
+        console.error('Error saat menyimpan file:', err);
+        res.status(500).json({ error: 'Terjadi kesalahan saat menyimpan video.' });
+      });
+    }).on('error', (err) => {
+      console.error('Error saat mengunduh file:', err);
+      res.status(500).json({ error: 'Terjadi kesalahan saat mengunduh video.' });
+    });
+    
           // Send video metadata
           res.json({
             creator: "herza",
@@ -66,24 +82,7 @@ app.use('/download', async (req, res) => {
           });
 
           // Download and delete file
-          res.download(filePath, (err) => {
-            if (err) {
-              console.error('Error saat mengunduh file:', err);
-            }
-            fs.unlinkSync(filePath);
-          });
-        });
-      });
-
-      file.on('error', (err) => {
-        console.error('Error saat menyimpan file:', err);
-        res.status(500).json({ error: 'Terjadi kesalahan saat menyimpan video.' });
-      });
-    }).on('error', (err) => {
-      console.error('Error saat mengunduh file:', err);
-      res.status(500).json({ error: 'Terjadi kesalahan saat mengunduh video.' });
-    });
-
+ 
   } catch (error) {
     console.error('Error:', error);
     res.status(500).json({ error: 'Terjadi kesalahan pada server' });
